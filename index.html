@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perjalanan.Id</title>
+    
+    <!-- Mengambil Font yang terlihat "Blocky" dan tegas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- PENGATURAN WARNA & TEMA --- */
+        :root {
+            /* Ubah warna background utama di sini */
+            --bg-color: #f4f3ee; 
+            
+            /* Warna Teks */
+            --text-main: #1a1a1a;
+            
+            /* Palet Warna "Brick" (Warna Balok) */
+            --brick-1: #ff8906; /* Oranye */
+            --brick-2: #f25f4c; /* Merah */
+            --brick-3: #e53170; /* Pink Tua */
+            --brick-4: #7f5af0; /* Ungu */
+            --brick-5: #2cb67d; /* Hijau */
+            
+            /* Warna Border & Shadow */
+            --border-color: #000000;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden; /* Mencegah scroll horizontal */
+        }
+
+        /* Container Utama (Tengah) */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        /* --- HEADER --- */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border: 3px solid var(--border-color);
+            background: #fffffe;
+            padding: 20px;
+            box-shadow: 8px 8px 0px var(--border-color); /* Efek bayangan kotak */
+            transform: rotate(-1deg); /* Sedikit miring agar artsy */
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        header p {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        /* --- DAFTAR ARTIKEL (STACK) --- */
+        .article-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 50px;
+        }
+
+        /* Gaya Tombol/Balok Artikel */
+        .brick-btn {
+            display: block;
+            width: 100%;
+            padding: 25px 20px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-align: left;
+            text-decoration: none;
+            color: #000;
+            background: #fff;
+            border: 3px solid var(--border-color);
+            box-shadow: 6px 6px 0px var(--border-color); /* Shadow tebal */
+            cursor: pointer;
+            transition: all 0.1s ease;
+            position: relative;
+        }
+
+        /* Efek Hover (Saat mouse di atas) */
+        .brick-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0px var(--border-color);
+        }
+
+        /* Efek Klik (Saat ditekan) */
+        .brick-btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: 2px 2px 0px var(--border-color);
+        }
+
+        /* Meta data kecil di dalam tombol (tanggal/kategori) */
+        .brick-meta {
+            display: block;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            opacity: 0.7;
+        }
+
+        /* Warna-warni Balok (Looping otomatis via CSS nth-child) */
+        .brick-btn:nth-child(5n+1) { background-color: var(--brick-1); }
+        .brick-btn:nth-child(5n+2) { background-color: var(--brick-2); color: white; }
+        .brick-btn:nth-child(5n+3) { background-color: var(--brick-3); color: white; }
+        .brick-btn:nth-child(5n+4) { background-color: var(--brick-4); color: white; }
+        .brick-btn:nth-child(5n+5) { background-color: var(--brick-5); }
+
+        /* --- HALAMAN BACA ARTIKEL (OVERLAY) --- */
+        #article-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            z-index: 1000;
+            overflow-y: auto;
+            transform: translateY(100%); /* Tersembunyi di bawah */
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            justify-content: center;
+        }
+
+        #article-view.active {
+            transform: translateY(0); /* Muncul ke layar */
+        }
+
+        .article-content-wrapper {
+            max-width: 700px;
+            width: 100%;
+            padding: 40px 20px;
+            padding-bottom: 100px;
+            background: #fff;
+            min-height: 100vh;
+            border-left: 3px solid var(--border-color);
+            border-right: 3px solid var(--border-color);
+        }
+
+        /* Tombol Kembali */
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            background: #000;
+            color: #fff;
+            font-family: 'Space Mono', monospace;
+            font-weight: bold;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+        }
+
+        .back-btn:hover {
+            background: #333;
+        }
+
+        /* Typography Artikel */
+        #art-title {
+            font-size: 2.5rem;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            border-bottom: 3px solid #000;
+            padding-bottom: 20px;
+        }
+
+        #art-date {
+            font-family: 'Space Mono', monospace;
+            color: #666;
+            margin-bottom: 30px;
+            display: block;
+        }
+
+        #art-body {
+            font-size: 1.1rem;
+            white-space: pre-wrap; /* Agar enter/paragraf terbaca sesuai tulisan */
+        }
+
+        /* Style untuk paragraf dalam artikel */
+        #art-body p {
+            margin-bottom: 1.5em;
+            text-align: justify;
+        }
+
+        /* Responsive Mobile */
+        @media (max-width: 600px) {
+            .container { padding: 20px 15px; }
+            header h1 { font-size: 2rem; }
+            .brick-btn { font-size: 1rem; padding: 20px; }
+            .article-content-wrapper { border: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HALAMAN UTAMA (LIST LINK) -->
+    <div class="container" id="main-menu">
+        <header>
+            <!-- GANTI JUDUL WEBSITE DI SINI -->
+            <h1>Perjalanan.Id</h1>
+            <p>Catatan kecil dari sebuah perjalanan panjang.</p>
+        </header>
+
+        <!-- Area di mana tombol-tombol akan muncul -->
+        <div class="article-stack" id="stack-container">
+            <!-- Artikel akan digenerate oleh JavaScript di bawah -->
+        </div>
+        
+        <footer style="text-align: center; margin-top: 50px; font-family: 'Space Mono'; font-size: 0.8rem; opacity: 0.6;">
+            @agus11082007 Perjalanan.Id
+        </footer>
+    </div>
+
+    <!-- HALAMAN BACA (TERSEMBUNYI AWALNYA) -->
+    <div id="article-view">
+        <div class="article-content-wrapper">
+            <button class="back-btn" onclick="closeArticle()">← Kembali</button>
+            
+            <h1 id="art-title">Judul Artikel</h1>
+            <small id="art-date">Tanggal</small>
+            <div id="art-body">
+                Isi konten...
+            </div>
+            
+            <br><br>
+            <button class="back-btn" onclick="closeArticle()">Tutup</button>
+        </div>
+    </div>
+
+    <!-- SCRIPT JAVASCRIPT -->
+    <script>
+        // ==========================================
+        //       AREA EDIT KONTEN ARTIKEL
+        // ==========================================
+        // Silakan tambah, hapus, atau ubah artikel di dalam kurung siku []
+        // Gunakan format: { title: "Judul", date: "Tanggal", content: `Isi` },
+        
+        const articles = [
+            {
+                id: 1,
+                title: "Memulai Langkah Pertama haloo",
+                date: "12 Oktober 2024",
+                content: `
+Bagian tersulit dari sebuah perjalanan bukanlah saat mendaki tanjakan terjal, melainkan saat kita harus mengikat tali sepatu dan melangkah keluar dari pintu rumah.
+
+Seringkali kita terlalu banyak berpikir. "Bagaimana jika hujan?", "Bagaimana jika tersesat?". Padahal, jawaban dari pertanyaan itu hanya bisa ditemukan di jalan, bukan di dalam kepala.
+
+Hari ini saya belajar bahwa keberanian bukan berarti tidak takut, melainkan tetap berjalan meski kaki gemetar. Langkah pertama memang kecil, tapi itulah satu-satunya cara untuk berpindah tempat.`
+            }
+
+        ];
+
+        // ==========================================
+        //       LOGIKA WEBSITE (JANGAN DIUBAH)
+        // ==========================================
+        
+        const stackContainer = document.getElementById('stack-container');
+        const articleView = document.getElementById('article-view');
+        const artTitle = document.getElementById('art-title');
+        const artDate = document.getElementById('art-date');
+        const artBody = document.getElementById('art-body');
+
+        // Fungsi untuk membuat tombol-tombol artikel (Render)
+        function renderArticles() {
+            stackContainer.innerHTML = '';
+            
+            articles.forEach((article, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'brick-btn';
+                
+                // Animasi masuk bertahap (Staggered animation)
+                btn.style.animation = `fadeIn 0.5s ease forwards ${index * 0.1}s`;
+                btn.style.opacity = '0'; 
+
+                // Isi HTML tombol
+                btn.innerHTML = `
+                    <span class="brick-meta">${article.date}</span>
+                    ${article.title}
+                `;
+
+                // Event saat diklik
+                btn.onclick = () => openArticle(article);
+                
+                stackContainer.appendChild(btn);
+            });
+        }
+
+        // Fungsi membuka artikel
+        function openArticle(article) {
+            artTitle.innerText = article.title;
+            artDate.innerText = article.date;
+            
+            // Mengubah baris baru menjadi paragraf HTML
+            // Agar format paragraf user tetap rapi
+            const formattedContent = article.content
+                .split('\n\n') // Pisahkan berdasarkan enter 2x
+                .map(para => `<p>${para.trim()}</p>`)
+                .join('');
+            
+            artBody.innerHTML = formattedContent;
+            
+            // Tampilkan layar artikel
+            articleView.classList.add('active');
+            
+            // Disable scroll di menu utama
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Fungsi menutup artikel
+        function closeArticle() {
+            articleView.classList.remove('active');
+            
+            // Enable scroll kembali
+            document.body.style.overflow = 'auto';
+        }
+
+        // Tambahkan keyframes untuk animasi masuk lewat JS agar rapi
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // Jalankan render saat halaman dimuat
+        renderArticles();
+
+    </script>
+</body>
+</html>
+
